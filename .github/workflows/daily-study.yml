@@ -1,0 +1,33 @@
+name: Daily Study Maintenance
+
+on:
+  schedule:
+    - cron: "30 18 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  daily-update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Update study log
+        run: |
+          mkdir -p study-log
+          date=$(date -u +"%Y-%m-%d")
+          echo "# Study activity - $date" > "study-log/$date.md"
+          echo "" >> "study-log/$date.md"
+          echo "Automated daily repository maintenance." >> "study-log/$date.md"
+
+      - name: Commit update
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add study-log/
+          git diff --cached --quiet || git commit -m "chore: update daily study log"
+          git push
